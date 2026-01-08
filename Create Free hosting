@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>PagesDrop Elite – Static Hosting UI</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#05070a;
+  --panel:#0f121a;
+  --accent:#6366f1;
+  --success:#00f2fe;
+  --error:#ff4b5c;
+  --text:#e2e8f0;
+  --text-dim:#64748b;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:Inter,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.card{
+  width:100%;
+  max-width:520px;
+  background:var(--panel);
+  border-radius:28px;
+  padding:40px;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 40px 90px rgba(0,0,0,.6);
+  position:relative;
+}
+
+.badge{
+  position:absolute;
+  top:20px;
+  right:20px;
+  background:linear-gradient(90deg,#6366f1,#00f2fe);
+  padding:4px 12px;
+  border-radius:20px;
+  font-size:9px;
+  font-weight:900;
+  color:#000;
+  letter-spacing:1px;
+}
+
+h1{
+  text-align:center;
+  font-weight:800;
+  font-size:28px;
+}
+h1 span{color:var(--success)}
+
+.subtitle{
+  text-align:center;
+  color:var(--text-dim);
+  font-size:14px;
+  margin:10px 0 30px;
+}
+
+.label{
+  font-size:10px;
+  font-weight:700;
+  color:var(--text-dim);
+  margin-bottom:8px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+.url-box{
+  display:flex;
+  align-items:center;
+  background:#000;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;
+  padding:10px;
+}
+
+.url-box span{
+  font-family:"JetBrains Mono",monospace;
+  color:var(--accent);
+  font-size:13px;
+}
+
+.url-box input{
+  flex:1;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#fff;
+  font-family:"JetBrains Mono",monospace;
+  font-size:14px;
+  padding-left:6px;
+}
+
+.drop-zone{
+  margin-top:22px;
+  padding:36px;
+  border-radius:18px;
+  border:2px dashed rgba(255,255,255,.15);
+  text-align:center;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.drop-zone:hover{
+  border-color:var(--accent);
+  background:rgba(99,102,241,.05);
+}
+
+.drop-zone small{
+  color:var(--text-dim);
+  font-size:11px;
+}
+
+button{
+  width:100%;
+  margin-top:26px;
+  padding:16px;
+  border-radius:16px;
+  border:none;
+  font-weight:800;
+  font-size:14px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+button:disabled{
+  background:#1e293b;
+  color:#475569;
+  cursor:not-allowed;
+}
+
+button.active{
+  background:#fff;
+  color:#000;
+}
+
+button.active:hover{
+  background:var(--success);
+}
+
+.deploying{
+  animation:pulse 1s infinite;
+  pointer-events:none;
+}
+
+@keyframes pulse{
+  0%{opacity:1}
+  50%{opacity:.6}
+  100%{opacity:1}
+}
+
+.success-box{
+  margin-top:30px;
+  padding:24px;
+  border-radius:20px;
+  background:rgba(0,242,254,.05);
+  border:1px solid rgba(0,242,254,.15);
+  text-align:center;
+}
+
+.hidden{display:none}
+
+.success-box small{
+  display:block;
+  margin-top:10px;
+  font-size:11px;
+  color:var(--text-dim);
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <div class="badge">STATIC</div>
+
+  <h1>Pages<span>Drop</span></h1>
+  <p class="subtitle">Modern Static Hosting Interface</p>
+
+  <div id="form">
+    <div class="label">Project URL</div>
+    <div class="url-box">
+      <span>https://</span>
+      <input id="siteName" placeholder="my-project">
+    </div>
+
+    <div class="drop-zone" id="dropZone">
+      <strong>Select Project File</strong><br>
+      <small>HTML / ZIP / Any static file</small>
+      <input type="file" id="fileInput" hidden>
+    </div>
+
+    <button id="deployBtn" disabled>DEPLOY PROJECT</button>
+  </div>
+
+  <div id="success" class="success-box hidden">
+    <strong style="color:var(--success)">Deployment Successful</strong>
+    <div id="finalUrl" style="margin-top:10px;font-family:'JetBrains Mono',monospace;"></div>
+    <small>This interface represents a static deployment workflow.</small>
+    <button onclick="location.reload()" class="active">DEPLOY NEW PROJECT</button>
+  </div>
+</div>
+
+<script>
+const siteName=document.getElementById("siteName");
+const fileInput=document.getElementById("fileInput");
+const dropZone=document.getElementById("dropZone");
+const deployBtn=document.getElementById("deployBtn");
+
+dropZone.onclick=()=>fileInput.click();
+
+function validate(){
+  deployBtn.disabled=!(siteName.value.length>2 && fileInput.files.length>0);
+  deployBtn.className=deployBtn.disabled?"":"active";
+}
+
+siteName.oninput=validate;
+
+fileInput.onchange=()=>{
+  dropZone.innerHTML="📄 "+fileInput.files[0].name;
+  validate();
+};
+
+deployBtn.onclick=()=>{
+  deployBtn.classList.add("deploying");
+  deployBtn.innerText="Deploying...";
+  setTimeout(()=>{
+    document.getElementById("form").classList.add("hidden");
+    document.getElementById("success").classList.remove("hidden");
+    document.getElementById("finalUrl").innerText=
+      location.origin+"/"+siteName.value;
+  },2000);
+};
+</script>
+
+</body>
+</html>
